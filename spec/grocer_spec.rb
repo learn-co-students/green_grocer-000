@@ -114,7 +114,7 @@ describe "Grocer" do
         cheese = find_item('CHEESE')
         cart = Array.new(4, cheese)
         3.times { cart << avocado }
-        consolidated_cart = consolidate_cart(cart: cart)
+        consolidated_cart = consolidate_cart(cart: cart) #4 cheeses, 3 avocados
         coupons = [find_coupon("AVOCADO"), find_coupon("CHEESE")]
 
         multiple_coupons = apply_coupons(cart: consolidated_cart, coupons: coupons)

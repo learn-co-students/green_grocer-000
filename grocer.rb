@@ -51,6 +51,7 @@ def checkout(cart: [], coupons: [])
     total *= 0.9
   end 
   total
+  
 end
 
 

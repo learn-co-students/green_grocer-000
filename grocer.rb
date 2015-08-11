@@ -1,5 +1,3 @@
-require 'pry'
-
 
 def consolidate_cart(cart:[])
   cart.each do |outerhash|
@@ -56,6 +54,8 @@ def checkout(cart: [], coupons: [])
   end
   return total
 end
+
+
 
 
 

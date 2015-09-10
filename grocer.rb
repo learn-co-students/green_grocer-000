@@ -21,7 +21,8 @@ COUPS = [
 
 def consolidate_cart(cart:[])
   # code here
-  #new hash
+  
+
   new_cart = {} 
 
   cart.each do |item|
@@ -37,50 +38,6 @@ def consolidate_cart(cart:[])
   new_cart
 end
 
-
-# def apply_coupons(cart:[], coupons:[])
-  
-#   new_cart_array = []
-#   new_cart_array << cart
-  
-#   #def apply_coupons(cart, coupons)
-#   # code here
-#   #1. get coupons
-#   #2. check cart for products matching coupons
-#   #3. reduce item qty by coupon
-#   #4. add new item in cart of coupon
-# binding.pry
-
-
-
-#   #go through each coupon
-#   coupons.each do |coupon_details|
-#     cart.each do |item, attributes|
-      
-      
-#       if item == coupon_details[:item]
-        
-#         #attributes[:count] -=  coupon_details[:num]
-        
-#         discount_item = ""
-#         #binding.pry 
-#         discount_item = coupon_details[:item] + " W/COUPON"
-
-#         #cart[discount_item] = {price: coupon_details[:cost], clearance: true, count: 1}
-
-        
-
-#       end
-
-    
-#   end
-#   cart[discount_item] = {price: coupon_details[:cost], clearance: true,
-#                           count: 1}
-#                           binding.pry
-
-#   end
-
-# end
 
 def apply_coupons(cart:[], coupons:[])
   
@@ -109,11 +66,9 @@ def apply_clearance(cart:[])
 
   cart.each do |item, attributes|
     if attributes[:clearance] == true
-      attributes[:price] *= 0.8.round(2)
-      attributes[:price].round(2)
-    
+      new_round_num = (attributes[:price] *= 0.8).round(2)
+      attributes[:price] = new_round_num
     end
-    binding.pry
   end
 
 end
@@ -121,6 +76,22 @@ end
 
 def checkout(cart: [], coupons: [])
   # code here
+
+
+  total = 0
+  new_cart = consolidate_cart(:cart=>cart)
+  new_cart = apply_coupons(:cart=>new_cart, :coupons=>coupons)
+  new_cart = apply_clearance(:cart=>new_cart)
+  
+  new_cart.each do |item, attributes|
+    total += attributes[:price] * attributes[:count]
+  end
+  
+  if total > 100
+    total = (total * 0.9).round(2)
+  end
+  total
+
 end
 
 #apply_coupons(ITEMS, COUPS)

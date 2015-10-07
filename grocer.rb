@@ -16,45 +16,16 @@ def consolidate_cart(cart:[])
 end
 
 def apply_coupons(cart:[], coupons:[])
-  cart_with_coupons = {}
-  cart.each{|item,item_info|
-    if !cart_with_coupons.include?(item)
-      item_info[:count] = cart[item][:count]
-      cart_with_coupons[item] = item_info
-    else
-      cart_with_coupons[item][:count] += cart[item][:count]
-    end
-  }
   coupons.each{|coupon|
-    item_with_coupon = "#{coupon[:item]} W/COUPON"
-    if !cart_with_coupons.include?(item_with_coupon) && cart_with_coupons.include?(coupon[:item])
-      cart_with_coupons[item_with_coupon] = { price: coupon[:cost], 
-                                              clearance: cart_with_coupons[coupon[:item]][:clearance],
-                                              num:  coupon[:num],
-                                              count: 1
-                                            }
-    elsif cart_with_coupons.include?(item_with_coupon)
-      cart_with_coupons[item_with_coupon][:count] += 1
+    if cart.include?("#{coupon[:item]} W/COUPON")
+      cart["#{coupon[:item]} W/COUPON"][:count] += 1
+      cart[coupon[:item]][:count] -= coupon[:num]
+    elsif cart.include?coupon[:item]
+      cart["#{coupon[:item]} W/COUPON"] = {:price => coupon[:cost], :clearance => cart[coupon[:item]][:clearance], :num => coupon[:num], :count => 1}
+      cart[coupon[:item]][:count] -= coupon[:num]
     end
   }
-  cart_with_coupons.each{|item, item_info|
-    if !item.include?"W/COUPON"
-      item_with_coupon = "#{item} W/COUPON"
-      if cart_with_coupons.include? "#{item} W/COUPON"
-        item_with_coupon_count = 0
-        until cart_with_coupons[item_with_coupon][:count] <= 0 || cart_with_coupons[item][:count] <= 0
-          cart_with_coupons[item_with_coupon][:count] -= 1
-          cart_with_coupons[item][:count] -= cart_with_coupons[item_with_coupon][:num]
-          item_with_coupon_count += 1
-            if cart_with_coupons[item][:count] < 0   ### changed for negative, differance between coupons and items to be kicked back to the item
-              cart_with_coupons[item][:count] = cart_with_coupons[item][:count].abs
-            end
-        end
-        cart_with_coupons[item_with_coupon][:count] = item_with_coupon_count
-      end
-    end
-  }
-  cart_with_coupons
+  cart
 end
 
 def apply_clearance(cart:[])
@@ -65,14 +36,20 @@ def apply_clearance(cart:[])
   }
 end
 
+
 def checkout(cart: [], coupons: [])
   cart_total = 0.0
-  apply_clearance(cart: apply_coupons(cart: consolidate_cart(cart: cart), coupons: coupons)).each{|item, item_info|
-    if item_info.include?(:num) && item_info[:num] * item_info[:count] > consolidate_cart(cart: cart)[item.split.first].count
-      cart_total += (item_info[:count].to_f/item_info[:num].to_f) * item_info[:price].to_f
-    else
-      cart_total += (item_info[:price] * item_info[:count])
-    end
+  consolidated_cart = consolidate_cart(cart: cart)
+  coupons_applied = apply_coupons(cart: consolidated_cart, coupons: coupons)
+  final_cart = apply_clearance(cart: coupons_applied)
+  final_cart.each{|item, item_info|
+  if item_info[:count] < 0
+    cart_total += (item_info[:count] * item_info[:price]).abs
+  elsif item.include?("COUPON") && item_info[:count] > final_cart[item.split.first][:count]
+    cart_total += (item_info[:count] + final_cart[item.split.first][:count]) * item_info[:price]
+  else 
+    cart_total += item_info[:count] * item_info[:price]
+  end
   }
   if cart_total > 100
     cart_total = cart_total - (cart_total * 0.1)

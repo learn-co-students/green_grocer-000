@@ -73,11 +73,11 @@ end
 def checkout(cart, coupons)
 	total = 0
 
-  	consolidated = consolidate_cart( cart)
-  	coupons_applied = apply_coupons(consolidated, coupons)
-  	clearance_applied = apply_clearance(coupons_applied)
+  	consolidated = consolidate_cart(cart)
+  	coupond = apply_coupons(consolidated, coupons)
+  	cleared = apply_clearance(coupond)
 
-  	new_array = consolidated.collect do |item, properties|
+  	new_array = cleared.collect do |item, properties|
  	   properties[:price] * properties[:count]
   	end
   	#binding.pry
